@@ -1,0 +1,231 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum LabourType {
+  PLUMBER
+  CARPENTER
+  ELECTRICIAN
+  PAINTER
+  TILE_MAN
+  WINDOW_MAN
+}
+
+enum JobStatus {
+  OPEN
+  PENDING_DIRECT
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum OrderStatus {
+  PENDING_SHOP
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  REJECTED
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  address     String
+  phone       String   @default("")
+  isUser      Boolean  @default(true)
+  isLabour    Boolean  @default(false)
+  isShopOwner Boolean  @default(false)
+  isRider     Boolean  @default(false)
+  isAdmin     Boolean  @default(false)
+  isBanned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  labourProfile     LabourProfile?
+  shop              Shop?
+  jobsPosted        Job[]          @relation("ClientJobs")
+  jobsAssigned      Job[]          @relation("AssignedLabourJobs")
+  bids              JobBid[]
+  ordersPlaced      Order[]        @relation("CustomerOrders")
+  deliveries        Order[]        @relation("RiderDeliveries")
+  complaintsFiled   Complaint[]    @relation("ComplaintReporter")
+  complaintsAgainst Complaint[]    @relation("ComplaintTarget")
+  reviewsWritten    Review[]       @relation("ReviewAuthor")
+  reviewsReceived   Review[]       @relation("ReviewTarget")
+  shopReviewsWritten ShopReview[]  @relation("ShopReviewAuthor")
+  notifications     Notification[]
+}
+
+model LabourProfile {
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  labourType  LabourType
+  bio         String     @default("")
+  rating      Float      @default(0)
+  ratingCount Int        @default(0)
+  imageUrl    String     @default("")
+  area        String     @default("")
+}
+
+model Job {
+  id               String     @id @default(cuid())
+  title            String
+  description      String
+  budget           Float
+  agreedPrice      Float?
+  labourType       LabourType
+  isPublic         Boolean    @default(false)
+  status           JobStatus  @default(PENDING_DIRECT)
+  location         String     @default("")
+  clientId         String
+  client           User       @relation("ClientJobs", fields: [clientId], references: [id])
+  assignedLabourId String?
+  assignedLabour   User?      @relation("AssignedLabourJobs", fields: [assignedLabourId], references: [id])
+  bids             JobBid[]
+  review           Review?
+  createdAt        DateTime   @default(now())
+}
+
+model JobBid {
+  id             String    @id @default(cuid())
+  jobId          String
+  job            Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  labourId       String
+  labour         User      @relation(fields: [labourId], references: [id])
+  proposedAmount Float
+  message        String    @default("")
+  status         BidStatus @default(PENDING)
+  createdAt      DateTime  @default(now())
+
+  @@unique([jobId, labourId])
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  jobId        String   @unique
+  job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetUserId String
+  targetUser   User     @relation("ReviewTarget", fields: [targetUserId], references: [id])
+  rating       Int
+  comment      String   @default("")
+  createdAt    DateTime @default(now())
+}
+
+model Complaint {
+  id           String   @id @default(cuid())
+  reporterId   String
+  reporter     User     @relation("ComplaintReporter", fields: [reporterId], references: [id])
+  targetUserId String
+  targetUser   User     @relation("ComplaintTarget", fields: [targetUserId], references: [id])
+  reason       String
+  createdAt    DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  href      String   @default("/dashboard")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model Shop {
+  id          String         @id @default(cuid())
+  ownerId     String         @unique
+  owner       User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String
+  description String         @default("")
+  address     String
+  rating      Float          @default(0)
+  ratingCount Int            @default(0)
+  imageUrl    String         @default("")
+  area        String         @default("")
+  opensAt     Int            @default(540)
+  closesAt    Int            @default(1260)
+  categories  ShopCategory[]
+  orders      Order[]
+  reviews     ShopReview[]
+  createdAt   DateTime       @default(now())
+}
+
+model ShopCategory {
+  id     String     @id @default(cuid())
+  shopId String
+  shop   Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name   String
+  items  ShopItem[]
+}
+
+model ShopItem {
+  id          String       @id @default(cuid())
+  categoryId  String
+  category    ShopCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  description String       @default("")
+  price       Float
+  available   Boolean      @default(true)
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  customerId      String
+  customer        User        @relation("CustomerOrders", fields: [customerId], references: [id])
+  shopId          String
+  shop            Shop        @relation(fields: [shopId], references: [id])
+  riderId         String?
+  rider           User?       @relation("RiderDeliveries", fields: [riderId], references: [id])
+  deliveryAddress String
+  note            String      @default("")
+  totalAmount     Float
+  status          OrderStatus @default(PENDING_SHOP)
+  items           OrderItem[]
+  review          ShopReview?
+  createdAt       DateTime    @default(now())
+}
+
+/// One review per delivered order, written by the customer who placed it.
+model ShopReview {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation("ShopReviewAuthor", fields: [authorId], references: [id])
+  rating    Int
+  comment   String   @default("")
+  createdAt DateTime @default(now())
+
+  @@index([shopId, createdAt])
+}
+
+model OrderItem {
+  id           String    @id @default(cuid())
+  orderId      String
+  order        Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemId       String?
+  item         ShopItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  itemName     String
+  quantity     Int
+  priceAtOrder Float
+}

@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-elevated: #F1F5F9;
+  --color-ink: #0F172A;
+  --color-mute: #64748B;
+  --color-line: #E2E8F0;
+  --color-line-hover: #CBD5E1;
+
+  /* Primary Brand (Midnight Indigo) & Accent (Burnished Copper) */
+  --color-brand: #1E1B4B;
+  --color-brand-foreground: #FFFFFF;
+  --color-brand-soft: #EEF2FF;
+  --color-accent: #C2410C;
+  --color-accent-hover: #9A3412;
+  --color-accent-foreground: #FFFFFF;
+  --color-accent-soft: #FFEDD5;
+
+  /* Semantic Status Tokens */
+  --color-good: #0D9488;
+  --color-good-soft: #F0FDFA;
+  --color-gold: #CA8A04;
+  --color-gold-soft: #FEFCE8;
+  --color-bad: #BE123C;
+  --color-bad-soft: #FFF1F2;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: #090A14;
+  --color-card: #121426;
+  --color-elevated: #181B32;
+  --color-ink: #F8FAFC;
+  --color-mute: #94A3B8;
+  --color-line: #1E223D;
+  --color-line-hover: #312E81;
+
+  --color-brand: #312E81;
+  --color-brand-foreground: #FFFFFF;
+  --color-brand-soft: #1E1B4B;
+  --color-accent: #EA580C;
+  --color-accent-hover: #C2410C;
+  --color-accent-foreground: #FFFFFF;
+  --color-accent-soft: #431407;
+
+  --color-good: #2DD4BF;
+  --color-good-soft: #042F2E;
+  --color-gold: #FACC15;
+  --color-gold-soft: #422006;
+  --color-bad: #FB7185;
+  --color-bad-soft: #4C0519;
+}
+
+@theme {
+  --color-paper: var(--color-paper);
+  --color-card: var(--color-card);
+  --color-elevated: var(--color-elevated);
+  --color-ink: var(--color-ink);
+  --color-mute: var(--color-mute);
+  --color-line: var(--color-line);
+  --color-line-hover: var(--color-line-hover);
+
+  --color-brand: var(--color-brand);
+  --color-brand-foreground: var(--color-brand-foreground);
+  --color-brand-soft: var(--color-brand-soft);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-accent-soft: var(--color-accent-soft);
+
+  --color-gold: var(--color-gold);
+  --color-gold-soft: var(--color-gold-soft);
+  --color-bad: var(--color-bad);
+  --color-bad-soft: var(--color-bad-soft);
+  --color-good: var(--color-good);
+  --color-good-soft: var(--color-good-soft);
+
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display), var(--font-sans), sans-serif;
+  --font-mono: var(--font-mono), monospace;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: var(--font-display);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Star rating interactive picker */
+.star-picker {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  gap: 4px;
+}
+.star-picker input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.star-picker label {
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-line);
+  transition: color 0.15s, transform 0.15s;
+}
+.star-picker label:hover {
+  transform: scale(1.15);
+}
+.star-picker input:checked ~ label,
+.star-picker label:hover,
+.star-picker label:hover ~ label {
+  color: var(--color-gold);
+}
+.star-picker input:focus-visible + label {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Ensure mobile space for bottom tabs */
+@media (max-width: 767px) {
+  body:has(.bottom-tabs) {
+    padding-bottom: 5.5rem;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Backward compatibility for dark mode hardcoded classes */
+:root[data-theme="dark"] .bg-white {
+  background-color: var(--color-card);
+}
+:root[data-theme="dark"] [class*="bg-white/"] {
+  background-color: color-mix(in srgb, var(--color-card) 90%, transparent);
+}
+:root[data-theme="dark"] [class*="border-white"] {
+  border-color: var(--color-line);
+}

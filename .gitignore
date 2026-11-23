@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Environment Configuration
+.env
+.env*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
+# Next.js Build Artifacts
+.next/
+out/
+
+# Prisma Client Artifacts
+app/generated/
+
+# TypeScript Build Cache
+*.tsbuildinfo
+next-env.d.ts
+
+# OS & Workspace Metadata
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Internal Architecture & Session Documents (Retained locally)
+SESSION_CONTEXT.md
+ROLES_AND_WORKFLOWS.md
+REDESIGN_SPEC.md
+AGENTS.md
+FEATURES.md
