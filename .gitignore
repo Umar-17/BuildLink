@@ -3,13 +3,9 @@ node_modules/
 /.pnp
 .pnp.js
 
-# Environment Configuration
-.env
-.env*.local
-.env.development
-.env.test
-.env.production
-!.env.example
+# Environment Configuration (All .env files completely excluded)
+.env*
+*.env
 
 # Next.js Build Artifacts
 .next/
